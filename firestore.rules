@@ -1,0 +1,16 @@
+rules_version = '2';
+
+// 收藏卡片：每個登入的訪客只有一份文件 users/{uid}，裡面只有 favorites（卡片 id 的清單）。
+// 只能讀寫自己的那一份，別人看不到你收藏了什麼。
+// 在 Firebase 主控台的 Firestore Database → 規則，把這整份貼上後按「發布」。
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['favorites'])
+        && request.resource.data.favorites is list
+        && request.resource.data.favorites.size() <= 300;
+    }
+  }
+}
