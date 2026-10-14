@@ -1,16 +1,53 @@
 rules_version = '2';
 
-// 收藏卡片：每個登入的訪客只有一份文件 users/{uid}，裡面只有 favorites（卡片 id 的清單）。
-// 只能讀寫自己的那一份，別人看不到你收藏了什麼。
 // 在 Firebase 主控台的 Firestore Database → 規則，把這整份貼上後按「發布」。
+// ADMIN_UID 要換成站長自己的帳號代號（UID）：登入後打開 kevinpage.link/#stats，頁面會給你一份已經填好的版本。
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && request.auth.uid == 'ADMIN_UID';
+    }
+    function shortText(d, k) {
+      return !(k in d) || (d[k] is string && d[k].size() <= 1000);
+    }
+
+    // 收藏卡片：每個登入的訪客只有一份文件 users/{uid}，裡面只有 favorites（卡片 id 的清單）。
+    // 只能讀寫自己的那一份，別人看不到你收藏了什麼。
     match /users/{uid} {
       allow read, delete: if request.auth != null && request.auth.uid == uid;
       allow create, update: if request.auth != null && request.auth.uid == uid
         && request.resource.data.keys().hasOnly(['favorites'])
         && request.resource.data.favorites is list
         && request.resource.data.favorites.size() <= 300;
+    }
+
+    // 卡片回饋：不用登入也能新增一筆「打開 view／做了 did／卡住 stuck」，不能改也不能刪。
+    // 文件 id 是「日期_裝置代號_卡片_種類」，所以同一台裝置同一天同一張卡，每種只會記一次。
+    // 沒有名字、帳號或 IP，只有一組隨機的裝置代號。只有站長讀得到。
+    match /votes/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['card', 'kind', 'src', 'day', 'at'])
+        && request.resource.data.kind in ['view', 'did', 'stuck']
+        && request.resource.data.src in ['card', 'sos']
+        && request.resource.data.card is string && request.resource.data.card.matches('[a-z0-9-]{1,60}')
+        && request.resource.data.day is string && request.resource.data.day.matches('[0-9]{8}')
+        && request.resource.data.at == request.time
+        && id.matches('[0-9]{8}_[a-z0-9]{8,16}_[a-z0-9-]{1,60}_(view|did|stuck)')
+        && id == request.resource.data.day + '_' + id.split('_')[1] + '_' + request.resource.data.card + '_' + request.resource.data.kind;
+      allow read: if isAdmin();
+    }
+
+    // 讀者投稿的實驗日記：不用登入也能投稿，每段最多 1000 字；只有站長讀得到，整理後才會放上網站。
+    match /stories/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['card', 'kind', 'lang', 'stuck', 'resist', 'shift', 'at'])
+        && request.resource.data.keys().hasAll(['card', 'kind', 'lang', 'at'])
+        && request.resource.data.card is string && request.resource.data.card.matches('[a-z0-9-]{1,60}')
+        && request.resource.data.kind in ['did', 'stuck']
+        && request.resource.data.lang in ['zh', 'en']
+        && shortText(request.resource.data, 'stuck')
+        && shortText(request.resource.data, 'resist')
+        && shortText(request.resource.data, 'shift')
+        && request.resource.data.at == request.time;
+      allow read: if isAdmin();
     }
   }
 }

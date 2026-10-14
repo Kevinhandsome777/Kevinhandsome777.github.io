@@ -211,6 +211,33 @@ details.more>div{display:flex;flex-direction:column;gap:16px}
 .track i{display:block;height:100%;width:0;background:var(--accent);border-radius:inherit;transition:width .25s linear}
 .sosok{width:84px;height:84px;border-radius:50%;background:var(--n2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2316163a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/44px no-repeat;box-shadow:var(--sh-note)}
 
+/* 實驗日記：像貼在卡片後面的一張手寫紀錄 */
+.diary{display:flex;flex-direction:column;gap:12px}
+.entry{background:var(--panel);border-left:4px solid var(--note,var(--n0));border-radius:4px 12px 12px 4px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:8px;font-size:15px;line-height:1.75}
+.entry .by{font-size:12.5px;color:var(--ink-soft);letter-spacing:.04em}
+/* 回饋：今天試了嗎？兩個按鈕，按完說謝謝，再邀請寫日記 */
+.fb{background:var(--panel);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.fbrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fbrow button{background:var(--surface);border-radius:10px;padding:10px 8px;font-size:14.5px;font-weight:700;text-align:center;box-shadow:var(--sh-1)}
+@media (hover:hover){.fbrow button:hover{background:var(--accent-soft);color:var(--accent)}}
+.fb .thanks{font-weight:700}
+.fb .smaller{background:var(--n2);color:var(--note-ink);border-radius:4px;padding:10px 12px;box-shadow:var(--sh-note)}
+.fb .smaller b{display:block;font-size:12.5px;letter-spacing:.06em;opacity:.75}
+.story{display:flex;flex-direction:column;gap:10px}
+.story label{display:flex;flex-direction:column;gap:4px;font-size:14px}
+.story textarea,.rules{width:100%;border:1px solid var(--hair);border-radius:10px;background:var(--surface);color:var(--ink);padding:10px 12px;font:inherit;font-size:14.5px;line-height:1.6;resize:vertical}
+.rules{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;line-height:1.5}
+.linkbtn{align-self:flex-start;color:var(--accent);font-weight:700;font-size:14px}
+/* 數據頁 */
+.srows{display:flex;flex-direction:column;gap:8px}
+.srow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 12px;background:var(--panel);border-radius:10px;padding:10px 12px}
+.srow .t{font-weight:700;font-size:14.5px;line-height:1.4}
+.srow .m{font-size:12.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums;white-space:nowrap}
+.srow .bar{grid-column:1/-1;height:5px;border-radius:99px;background:var(--hair);overflow:hidden}
+.srow .bar i{display:block;height:100%;background:var(--warn);border-radius:inherit}
+@media (hover:hover){.srow:hover{background:var(--accent-soft)}}
+
 @media (max-width:640px){
   .slab{border-radius:22px}
   .note{padding:10px}
@@ -364,6 +391,12 @@ html:lang(en) .eyebrow{text-wrap:balance}
     "en":{"step":"Put your phone in another room or zip it into your bag. Close the tabs that have nothing to do with the task. Then just sit back down in front of it and look at it.",
           "smaller":"Turn your phone face down and put it out of arm's reach."}}
 }}</script>
+<!-- 實驗日記：真的有人試過這張卡的紀錄，會出現在卡片抽屜裡「今天就練一次」的下面。
+     key 是卡片 id，每張卡可以放好幾篇；date 寫年月。zh／en 裡各有 who（誰寫的，例如「Kevin」或「一位讀者」）和三段：
+     stuck【卡關瞬間】、resist【抗拒與嘗試】、shift【微小轉折】。沒寫英文就顯示中文。
+     只放真實發生過的事。讀者從網站投稿的日記會出現在 kevinpage.link/#stats，整理後再貼到這裡。
+     例：{"two-minute-version":[{"date":"2026-10","zh":{"who":"Kevin","stuck":"…","resist":"…","shift":"…"}}]} -->
+<script type="application/json" id="diary-data">{}</script>
 <script>
 (()=>{
 const $=id=>document.getElementById(id);
@@ -396,6 +429,21 @@ zh:{html:'zh-Hant',title:'讀過的書，明天用得上',brand:'讀書行動卡
   sosSmaller:'太難了，再小一點',sosSwap:'換一件',sosRun:'慢慢來，做完再按',sosDid:'做完了',sosStop:'先停下',sosLeft:'剩下',
   sosDoneH:'你動起來了。',sosDoneP:'幾分鐘前你還動不了，現在你做完了一件事。今天這樣就夠了。',
   sosFull:'看這張卡的完整做法',sosAgain:'再來一件',sosEnough:'先這樣就好',
+  diaryH:'實驗日記',dParts:['卡關瞬間','抗拒與嘗試','微小轉折'],
+  fbAsk:'今天試了嗎？',fbDid:'✅ 我今天真的做了',fbStuck:'🚧 我試了但卡住',fbNote:'匿名記錄，只用來把卡片改得更好。',
+  fbDidThanks:'✅ 記下來了。你今天真的做了。',fbStuckThanks:'🚧 記下來了，謝謝你誠實說。這張卡我會拆得更小。',fbSmaller:'現在可以先試更小的一步',
+  storyAskDid:'願意說說你是怎麼做到的嗎？它會變成這張卡的實驗日記，陪下一個卡住的人。',storyAskStuck:'卡住的經驗一樣珍貴。願意寫下來嗎？',
+  storyOpen:'寫下我的實驗日記 →',storySend:'匿名送出',storyCancel:'先不用',storyNote:'不用寫名字。送出後會先經過整理，可能會匿名放到這張卡上。',
+  storyHint:{did:['那時候發生了什麼？你卡在哪裡？','一開始為什麼覺得很蠢或很難？後來怎麼試的？','做完有什麼不一樣？失敗過嗎？怎麼調整才成功？'],
+    stuck:['那時候發生了什麼？你卡在哪裡？','你怎麼試的？哪一步最難？','如果再試一次，你會把哪裡改小一點？']},
+  storyThanks:'收到了，謝謝你。這段經驗會幫到下一個卡住的人。',storyEmpty:'至少寫一段再送出。',storyFail:'沒有送出去，請檢查網路後再試一次。',
+  stats:'卡片數據',statsH:'最近 30 天，大家怎麼用這些卡',loading:'讀取中…',statsOff:'這個網站沒有設定 Firebase，所以沒有數據。',
+  statsSignIn:'用站長的 Google 帳號登入才看得到數據。',statsFail:'讀不到數據，請重新整理頁面。',
+  statsSum:(v,d,s)=>`👀 打開 ${v} 次・✅ 做了 ${d} 次・🚧 卡住 ${s} 次`,statsHard:'最常卡住的卡',statsHardNote:'紅色長條是「卡住」佔回饋的比例。比例高、又常被打開的卡，最需要把步驟拆小。',
+  statsTop:'最常被打開的卡',statsRow:(v,d,s)=>`👀 ${v}・✅ ${d}・🚧 ${s}`,statsNone:'還沒有資料。',storiesH:n=>`讀者投稿的實驗日記（${n}）`,storyKind:{did:'✅ 做到了',stuck:'🚧 卡住了'},
+  setupH:'還差一步：把規則貼到 Firebase',setupP:'數據只有你看得到，要先把下面這份規則發布到 Firebase。只要做一次：',
+  setupSteps:['打開 Firebase 主控台（console.firebase.google.com），點進 kevinpage 專案。','左邊選單點「Firestore Database」，再點上方的「規則」分頁。','把裡面原本的內容全部刪掉，貼上下面這份（已經填好你的帳號代號），按「發布」。','回到這一頁重新整理，就會看到數據。'],
+  copy:'複製規則',copied:'已複製 ✓',uidLine:u=>`你的帳號代號（UID）：${u}`,
   flow:['事情做不完','心情或人際','想學得更好','不知道怎麼選','錢和大環境'],
   lines:{'生產力':'把忙碌換成真正完成的事','專注':'把注意力留給重要的事','習慣':'讓好行為小到不會失敗','人生設計':'用小實驗找出下一步',
     '情緒':'卡住的時候，先穩住自己','學習':'學得更快，也記得更牢','寫作':'把想法寫成別人看得懂的字','決策':'在不確定裡做出好選擇',
@@ -422,6 +470,21 @@ en:{html:'en',title:'Reading Notes, Ready for Tomorrow',brand:'Book Action Cards
   sosSmaller:'Too hard, make it smaller',sosSwap:'Something else',sosRun:'Take your time. Tap when done',sosDid:'Done',sosStop:'Stop for now',sosLeft:'Left',
   sosDoneH:'You got moving.',sosDoneP:"A few minutes ago you couldn't move. Now you've finished one thing. That's enough for today.",
   sosFull:'See the full card',sosAgain:'One more',sosEnough:"That's enough for now",
+  diaryH:'Experiment diary',dParts:['Where I got stuck','Pushing back, then trying','The small shift'],
+  fbAsk:'Did you try it today?',fbDid:'✅ I actually did it',fbStuck:'🚧 I tried but got stuck',fbNote:'Recorded anonymously, only to make the cards better.',
+  fbDidThanks:'✅ Noted. You really did it today.',fbStuckThanks:"🚧 Noted, and thanks for being honest. I'll break this card into smaller steps.",fbSmaller:'For now, try an even smaller step',
+  storyAskDid:'Want to share how you did it? It becomes this card\'s experiment diary, for the next person who gets stuck.',storyAskStuck:'Getting stuck is worth sharing too. Want to write it down?',
+  storyOpen:'Write my experiment diary →',storySend:'Send anonymously',storyCancel:'Not now',storyNote:'No name needed. Entries are edited first and may appear on this card anonymously.',
+  storyHint:{did:['What was going on? Where were you stuck?','Why did it seem silly or hard at first? How did you try it anyway?','What changed afterwards? Did it fail at first? What did you adjust?'],
+    stuck:['What was going on? Where were you stuck?','How did you try it? Which step was hardest?','If you tried again, what would you make smaller?']},
+  storyThanks:'Got it, thank you. This will help the next person who gets stuck.',storyEmpty:'Write at least one part before sending.',storyFail:"Couldn't send. Check your connection and try again.",
+  stats:'Card stats',statsH:'How people used the cards in the last 30 days',loading:'Loading…',statsOff:"This site isn't set up with Firebase, so there are no stats.",
+  statsSignIn:"Sign in with the site owner's Google account to see the stats.",statsFail:"Couldn't load the stats. Please reload the page.",
+  statsSum:(v,d,s)=>`👀 ${v} opens · ✅ ${d} done · 🚧 ${s} stuck`,statsHard:'Cards people get stuck on',statsHardNote:'The red bar is the share of feedback that says "stuck". Cards with a high share that are also opened often need smaller steps most.',
+  statsTop:'Most opened cards',statsRow:(v,d,s)=>`👀 ${v} · ✅ ${d} · 🚧 ${s}`,statsNone:'No data yet.',storiesH:n=>`Experiment diaries from readers (${n})`,storyKind:{did:'✅ did it',stuck:'🚧 got stuck'},
+  setupH:'One more step: paste the rules into Firebase',setupP:'Only you can see the stats, once these rules are published in Firebase. You only need to do this once:',
+  setupSteps:['Open the Firebase console (console.firebase.google.com) and go into the kevinpage project.','In the left menu click "Firestore Database", then the "Rules" tab at the top.','Delete everything there, paste the rules below (your account ID is already filled in), and click "Publish".','Come back and reload this page to see the stats.'],
+  copy:'Copy rules',copied:'Copied ✓',uidLine:u=>`Your account ID (UID): ${u}`,
   flow:['Too much to do','Feelings or people','Learn better',"Can't decide",'Money & the world'],
   lines:{'Productivity':'Trade busyness for work that actually gets done','Focus':'Save your attention for what matters','Habits':'Make good habits too small to fail','Life Design':'Find your next step with small experiments',
     'Emotions':"When you're stuck, steady yourself first",'Learning':'Learn faster and remember longer','Writing':'Turn ideas into words others can follow','Decisions':'Make good choices under uncertainty',
@@ -589,6 +652,7 @@ function showCard(c){
     el('p',{class:'lead'},c.problem),
     ...sec(T.how,el('ol',{class:'big'},c.how_to_apply.map(s=>el('li',null,s)))),
     el('div',{class:'do'},el('b',null,T.practice),c.practice),
+    ...[diaryBox(c.id),feedbackBox(c)].filter(Boolean),
     el('div',{class:'meta'},el('span',null,T.time+c.time_required),el('span',null,T.diff,pips(c.difficulty)),el('span',null,T.impact,pips(c.impact))),
     el('details',{class:'more'},el('summary',null,T.moreSum),el('div',null,
       ...sec(T.core,c.core_idea),
@@ -612,7 +676,7 @@ function showBook(title){
 }
 function setHash(id){try{history.replaceState(null,'',id?'#'+id:location.pathname+location.search)}catch(e){}}
 function openPanel(){panel.classList.add('open');pbody.scrollTop=0}
-function openCard(id){const c=byId.get(id);if(!c)return;setHash(id);showCard(c);openPanel()}
+function openCard(id){const c=byId.get(id);if(!c)return;setHash(id);showCard(c);openPanel();track(id,'view','card')}
 function closePanel(){panel.classList.remove('open');setHash('')}
 $('close').onclick=closePanel;
 addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(panel.classList.contains('open'))closePanel();else if(!sosEl.hidden)closeSos();else if(!topicEl.hidden)closeTopic()});
@@ -623,7 +687,8 @@ addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(panel.classList.con
 const FB='https://www.gstatic.com/firebasejs/12.19.0/', pfav=$('pfav');
 const AUTH=/^https?:$/.test(location.protocol)&&typeof FIREBASE_CONFIG==='object'&&!!FIREBASE_CONFIG.apiKey;
 const UA=navigator.userAgent, INAPP=/\bLine\/|FBAN|FBAV|Instagram|MicroMessenger/i.test(UA); // App 內建的瀏覽器，Google 不讓它登入
-let fb=null, fbLoad=null, authReady=false, user=null, favs=[], favsLoad=Promise.resolve();
+let fb=null, fbLoad=null, authReady=false, user=null, favs=[], favsLoad=Promise.resolve(), authWait;
+const authP=new Promise(r=>authWait=r);
 const busy=new Set();
 let toastT;
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),4000)}
@@ -632,14 +697,15 @@ function startAuth(){
   fbLoad=Promise.all(['app','auth','firestore-lite'].map(n=>import(FB+'firebase-'+n+'.js'))).then(([A,U,S])=>{
     const app=A.initializeApp(FIREBASE_CONFIG);
     fb={auth:U.getAuth(app),db:S.getFirestore(app),popup:U.signInWithPopup,Google:U.GoogleAuthProvider,out:U.signOut,
-      doc:S.doc,get:S.getDoc,set:S.setDoc,union:S.arrayUnion,remove:S.arrayRemove};
+      doc:S.doc,get:S.getDoc,set:S.setDoc,union:S.arrayUnion,remove:S.arrayRemove,
+      col:S.collection,q:S.query,where:S.where,all:S.getDocs,now:S.serverTimestamp,ts:S.Timestamp};
     U.onAuthStateChanged(fb.auth,setUser);
   });
   fbLoad.catch(()=>{}); // 載不到 Firebase（離線、被擋）就當作沒有登入功能
 }
 const userDoc=()=>fb.doc(fb.db,'users',user.uid);
 function setUser(u){
-  authReady=true;
+  authReady=true;authWait();
   if((u&&u.uid)!==(user&&user.uid)){
     user=u;favs=[];
     favsLoad=u?fb.get(userDoc()).then(d=>{if(user===u)favs=(d.exists()&&d.data().favorites)||[]},()=>toast(T.loadFail)):Promise.resolve();
@@ -717,6 +783,103 @@ for(const b of document.querySelectorAll('.me'))b.onclick=()=>{if(user){showFavs
 pfav.onclick=()=>{if(pfav.dataset.fav)toggleFav(pfav.dataset.fav)};
 if(new URLSearchParams(location.search).has('openExternalBrowser')){const u=new URL(location.href);u.searchParams.delete('openExternalBrowser');try{history.replaceState(null,'',u)}catch(e){}}
 
+/* ---------- 實驗日記與回饋 ----------
+   卡片抽屜裡「今天就練一次」下面：先是真實的實驗日記（diary-data），再問「今天試了嗎？」。
+   回饋不用登入，存在 Firestore 的 votes：打開 view、做了 did、卡住 stuck，同一台裝置同一天同一張卡每種只記一次。
+   按完可以匿名寫下自己的實驗日記，存在 stories，只有站長在 #stats 看得到。 */
+const DIARY=JSON.parse($('diary-data').textContent), PARTS=['stuck','resist','shift'];
+const part=(i,t)=>t?el('p',null,el('b',null,'【'+T.dParts[i]+'】'),t):null;
+function diaryBox(id){
+  const list=DIARY[id]||[];if(!list.length)return null;
+  return el('section',{class:'diary'},el('h3',null,T.diaryH),list.map(d=>{const x=d[lang]||d.zh;
+    return el('article',{class:'entry'},el('div',{class:'by'},[x.who,d.date].filter(Boolean).join('・')),PARTS.map((k,i)=>part(i,x[k])))}));
+}
+/* 裝置代號：隨機的 12 個字，存在這台瀏覽器裡，不含任何個人資料 */
+let CID=null;try{CID=localStorage.getItem('cid')}catch(e){}
+if(!/^[a-z0-9]{8,16}$/.test(CID||'')){CID=(Math.random().toString(36).slice(2)+'000000000000').slice(0,12);try{localStorage.setItem('cid',CID)}catch(e){}}
+const today=()=>{const d=new Date();return ''+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())};
+const fbKey=(card,kind)=>`fb:${today()}:${card}:${kind}`, sent=new Set();
+try{for(const k of Object.keys(localStorage))if(k.startsWith('fb:')&&!k.startsWith('fb:'+today()))localStorage.removeItem(k)}catch(e){} // 清掉前幾天的紀錄
+function marked(card,kind){const k=fbKey(card,kind);if(sent.has(k))return true;try{return !!localStorage.getItem(k)}catch(e){return false}}
+function track(card,kind,src){
+  if(!AUTH||!fbLoad||!card||marked(card,kind))return;
+  const k=fbKey(card,kind), day=today();sent.add(k);try{localStorage.setItem(k,src)}catch(e){}
+  fbLoad.then(()=>fb.set(fb.doc(fb.db,'votes',`${day}_${CID}_${card}_${kind}`),{card,kind,src,day,at:fb.now()})).catch(()=>{}); // 沒記到也不打擾讀者
+}
+function feedbackBox(c){
+  if(!AUTH)return null;
+  const box=el('div',{class:'fb'});
+  const paint=()=>{
+    const k=marked(c.id,'did')?'did':marked(c.id,'stuck')?'stuck':null;
+    if(!k)return box.replaceChildren(el('b',null,T.fbAsk),
+      el('div',{class:'fbrow'},el('button',{onclick:()=>{track(c.id,'did','card');paint()}},T.fbDid),el('button',{onclick:()=>{track(c.id,'stuck','card');paint()}},T.fbStuck)),
+      el('p',{class:'small'},T.fbNote));
+    const sm=k==='stuck'&&SOS.cards[c.id]?sosText(SOS.cards[c.id]).smaller:null;
+    box.replaceChildren(el('p',{class:'thanks'},k==='did'?T.fbDidThanks:T.fbStuckThanks),sm?el('p',{class:'smaller'},el('b',null,T.fbSmaller),sm):null,storyBox(c,k));
+  };
+  paint();return box;
+}
+const storySent=new Set();
+function storyBox(c,kind){
+  const wrap=el('div',{class:'story'}), ask=kind==='did'?T.storyAskDid:T.storyAskStuck;
+  const idle=()=>wrap.replaceChildren(el('p',{class:'small'},ask),el('button',{class:'linkbtn',onclick:form},T.storyOpen));
+  function form(){
+    const fields=PARTS.map((k,i)=>{const t=el('textarea',{rows:'3',maxlength:'1000',placeholder:T.storyHint[kind][i]});return{k,t,box:el('label',null,el('b',null,'【'+T.dParts[i]+'】'),t)}});
+    const msg=el('p',{class:'small',role:'status'}), send=el('button',{class:'btn'},T.storySend);
+    send.onclick=async()=>{
+      const text=fields.map(f=>[f.k,f.t.value.trim().slice(0,1000)]).filter(([,v])=>v);
+      if(!text.length){msg.textContent=T.storyEmpty;return}
+      send.disabled=true;msg.textContent='';
+      try{await fbLoad;await fb.set(fb.doc(fb.col(fb.db,'stories')),{card:c.id,kind,lang,...Object.fromEntries(text),at:fb.now()});
+        storySent.add(c.id);wrap.replaceChildren(el('p',{class:'thanks'},T.storyThanks))}
+      catch(e){send.disabled=false;msg.textContent=T.storyFail}
+    };
+    wrap.replaceChildren(el('p',null,ask),...fields.map(f=>f.box),el('div',{class:'acts'},send,el('button',{class:'ghost',onclick:idle},T.storyCancel)),el('p',{class:'small'},T.storyNote),msg);
+    fields[0].t.focus();
+  }
+  if(storySent.has(c.id))wrap.append(el('p',{class:'small'},T.storyThanks));else idle();
+  return wrap;
+}
+
+/* ---------- 卡片數據（kevinpage.link/#stats，只有站長看得到） ---------- */
+async function showStats(){
+  shown={stats:true};pfavOff();setHash('stats');pbody.style.setProperty('--note','var(--n4)');
+  const put=(...k)=>{if(shown&&shown.stats)pbody.replaceChildren(el('span',{class:'tag'},T.stats),el('h2',null,T.statsH),...k)};
+  put(el('p',{class:'lead'},T.loading));openPanel();
+  if(!AUTH)return put(el('p',{class:'lead'},T.statsOff));
+  try{await fbLoad;await authP}catch(e){return put(el('p',{class:'lead'},T.statsOff))}
+  if(!user)return put(el('p',{class:'lead'},T.statsSignIn),el('button',{class:'btn',style:'align-self:flex-start',onclick:async()=>{if(await signIn())showStats()}},T.signIn));
+  const since=fb.ts.fromMillis(Date.now()-30*864e5);
+  let votes,stories;
+  try{[votes,stories]=await Promise.all(['votes','stories'].map(n=>fb.all(fb.q(fb.col(fb.db,n),fb.where('at','>=',since)))))}
+  catch(e){return put(...await statsSetup(e))}
+  const agg=new Map(), tot={view:0,did:0,stuck:0};
+  for(const d of votes.docs){const v=d.data();if(!byId.has(v.card)||!(v.kind in tot))continue;
+    if(!agg.has(v.card))agg.set(v.card,{view:0,did:0,stuck:0});agg.get(v.card)[v.kind]++;tot[v.kind]++}
+  const rate=a=>a.stuck/((a.did+a.stuck)||1);
+  const row=([id,a])=>el('button',{class:'srow',onclick:()=>openCard(id)},el('span',{class:'t'},byId.get(id).title),
+    el('span',{class:'m'},T.statsRow(a.view,a.did,a.stuck)),el('span',{class:'bar','aria-hidden':'true'},el('i',{style:`width:${Math.round(rate(a)*100)}%`})));
+  const hard=[...agg].filter(([,a])=>a.stuck).sort((x,y)=>rate(y[1])-rate(x[1])||y[1].view-x[1].view).slice(0,15);
+  const top=[...agg].sort((x,y)=>y[1].view-x[1].view).slice(0,10);
+  const st=stories.docs.map(d=>d.data()).filter(x=>x.at).sort((a,b)=>b.at.toMillis()-a.at.toMillis());
+  const list=(rows,f)=>rows.length?el('div',{class:'srows'},rows.map(f)):el('p',{class:'small'},T.statsNone);
+  put(el('p',{class:'lead'},T.statsSum(tot.view,tot.did,tot.stuck)),
+    ...sec(T.statsHard,hard.length?el('div',{class:'srows'},el('p',{class:'small'},T.statsHardNote),hard.map(row)):el('p',{class:'small'},T.statsNone)),
+    ...sec(T.statsTop,list(top,row)),
+    ...sec(T.storiesH(st.length),list(st,x=>el('article',{class:'entry'},
+      el('div',{class:'by'},[(byId.get(x.card)||{}).title||x.card,T.storyKind[x.kind],x.at.toDate().toLocaleDateString(T.html)].join('・')),
+      PARTS.map((k,i)=>part(i,x[k]))))));
+}
+/* 還沒發布規則時讀不到：把 firestore.rules 填好站長的帳號代號，讓他複製貼上 */
+async function statsSetup(e){
+  if(!/permission/i.test((e&&e.code)||''))return [el('p',{class:'lead'},T.statsFail)];
+  let rules='';try{rules=(await (await fetch('firestore.rules',{cache:'no-store'})).text()).replace(/ADMIN_UID/g,user.uid)}catch(x){}
+  const ta=el('textarea',{class:'rules',readonly:'',rows:'12','aria-label':'firestore.rules'});ta.value=rules;
+  const copy=el('button',{class:'btn',style:'align-self:flex-start'},T.copy);
+  copy.onclick=async()=>{try{await navigator.clipboard.writeText(rules);copy.textContent=T.copied}catch(x){ta.focus();ta.select()}};
+  return [el('h3',null,T.setupH),el('p',null,T.setupP),el('ol',null,T.setupSteps.map(t=>el('li',null,t))),copy,ta,el('p',{class:'small'},T.uidLine(user.uid))];
+}
+
 /* ---------- SOS：我現在完全動不了 ----------
    全螢幕、一次只給一件事：先問現在比較像哪一種狀態，再抽一張卡的起手式，按開始就倒數。
    覺得太難就換成更小的一步，做完給一句肯定。內容在上面的 sos-data，網址 #sos 可以直接打開。 */
@@ -741,7 +904,7 @@ function sosPick(state){
   if(!left.length){seen=[];left=pool.filter(id=>id!==ss.id)}
   if(!left.length)left=pool;
   const id=left[Math.random()*left.length|0];
-  ss={step:'card',state,id,small:false,seen:[...seen,id]};renderSos();
+  ss={step:'card',state,id,small:false,seen:[...seen,id]};renderSos();track(id,'view','sos');
 }
 function startSos(){stopSos();ss.step='run';ss.end=Date.now()+sosMin()*60000;renderSos();sosTimer=setInterval(tickSos,250)}
 function stopSos(){clearInterval(sosTimer);sosTimer=null}
@@ -752,7 +915,7 @@ function tickSos(){
   $('sosbar').style.width=(100-ms/total*100)+'%';
   if(!ms){try{navigator.vibrate&&navigator.vibrate(200)}catch(e){}doneSos()}
 }
-function doneSos(){stopSos();ss.step='done';renderSos()}
+function doneSos(){stopSos();ss.step='done';renderSos();track(ss.id,'did','sos')}
 function renderSos(){
   if(!ss)return;
   const head=(t,big)=>el('h1',{class:big?'':'s',tabindex:'-1'},t);
@@ -780,7 +943,7 @@ function renderSos(){
           el('button',{class:'btn big',onclick:doneSos},T.sosDid),
           el('button',{class:'ghost',onclick:()=>{stopSos();ss.step='card';ss.small=true;renderSos()}},T.sosStop))
         :el('div',{class:'sosacts'},el('button',{class:'btn big',onclick:startSos},'▶ '+T.sosStart(n)),
-          el('div',{class:'row'},ss.small?null:el('button',{class:'ghost',onclick:()=>{ss.small=true;renderSos()}},T.sosSmaller),
+          el('div',{class:'row'},ss.small?null:el('button',{class:'ghost',onclick:()=>{ss.small=true;track(ss.id,'stuck','sos');renderSos()}},T.sosSmaller),
             el('button',{class:'ghost',onclick:()=>sosPick(ss.state)},T.sosSwap)))];
   }
   sosBody.replaceChildren(...kids.filter(Boolean));sosEl.scrollTop=0;paintFavBtns();
@@ -796,7 +959,7 @@ function setLang(l){
   load();applyStatic();renderHome();renderFlow();
   if(cur!=null){const y=topicEl.scrollTop;openTopic(cur);topicEl.scrollTop=y;tspy()}
   if(ss)renderSos();
-  if(panel.classList.contains('open')&&shown){const y=pbody.scrollTop;shown.favs?showFavs():shown.card?showCard(byId.get(shown.card)):showBook((BOOK.get(shown.book)||{})[lang]||shown.book);pbody.scrollTop=y}
+  if(panel.classList.contains('open')&&shown){const y=pbody.scrollTop;shown.favs?showFavs():shown.stats?showStats():shown.card?showCard(byId.get(shown.card)):showBook((BOOK.get(shown.book)||{})[lang]||shown.book);pbody.scrollTop=y}
   paintAuth();
   if($('q').value.trim())applyFilter();else spy();
 }
@@ -804,10 +967,11 @@ for(const b of document.querySelectorAll('.lang'))b.onclick=()=>setLang(T.other)
 
 load();applyStatic();renderHome();renderFlow();
 spy();
+if(AUTH)startAuth();
 const h=decodeURIComponent(location.hash.slice(1));
 if(byId.has(h))openCard(h);
 else if(h==='sos')openSos();
-if(AUTH)startAuth();
+else if(h==='stats')showStats();
 })();
 </script>
 
