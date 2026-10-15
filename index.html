@@ -587,7 +587,7 @@ function renderFlow(){
       el('ol',{class:'steps'},s.quick_steps.map((t,i)=>el('li',{class:'pop',style:`--i:${i}`},el('b',null,i+1),el('span',null,t)))),
       el('div',{class:'label'},T.startWith),
       el('div',{class:'trio'},ids.slice(0,3).map(i=>note(byId.get(i)))),
-      extra,more);
+      ...[extra,more].filter(Boolean));
   }
 }
 
@@ -669,7 +669,7 @@ function showBook(title){
   shown={book:title};pfavOff();
   pbody.style.setProperty('--note','var(--n3)');setHash('');
   pbody.replaceChildren(el('span',{class:'tag'},T.book),el('h2',null,T.bookName(title)),
-    b.author?el('p',{class:'small'},b.author):null,b.short_note?el('p',{class:'lead'},b.short_note):null,
+    ...[b.author&&el('p',{class:'small'},b.author),b.short_note&&el('p',{class:'lead'},b.short_note)].filter(Boolean),
     ...(b.application_takeaways&&b.application_takeaways.length?sec(T.took,el('ul',null,b.application_takeaways.map(t=>el('li',null,t)))):[]),
     ...sec(T.fromBook(list.length),cardLinks(list.map(c=>c.id))));
   openPanel();
@@ -815,7 +815,7 @@ function feedbackBox(c){
       el('div',{class:'fbrow'},el('button',{onclick:()=>{track(c.id,'did','card');paint()}},T.fbDid),el('button',{onclick:()=>{track(c.id,'stuck','card');paint()}},T.fbStuck)),
       el('p',{class:'small'},T.fbNote));
     const sm=k==='stuck'&&SOS.cards[c.id]?sosText(SOS.cards[c.id]).smaller:null;
-    box.replaceChildren(el('p',{class:'thanks'},k==='did'?T.fbDidThanks:T.fbStuckThanks),sm?el('p',{class:'smaller'},el('b',null,T.fbSmaller),sm):null,storyBox(c,k));
+    box.replaceChildren(el('p',{class:'thanks'},k==='did'?T.fbDidThanks:T.fbStuckThanks),...[sm&&el('p',{class:'smaller'},el('b',null,T.fbSmaller),sm)].filter(Boolean),storyBox(c,k));
   };
   paint();return box;
 }
